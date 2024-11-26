@@ -1,4 +1,5 @@
 import { string, z } from "zod";
+import { phoneNumber } from "./login.schemas";
 
 export const signupSchema = z.object({
   profile: z.string().refine(
@@ -11,12 +12,18 @@ export const signupSchema = z.object({
       message: "Profile image must be less than 2MB and in jpeg, png, or jpg format",
     }
   ),
-  fullname: z
-    .string()
-    .trim()
-    .min(1, { message: "Full name should not be empty" })
-    .max(30, { message: "Full name length should be less than 30 characters" }),
+
+  firstName: z
+  .string()
+  .trim()
+  .min(1, { message: "First name should not be empty" })
+  .max(30, { message: "First name length should be less than 30 characters" }),
+  lastName: z.string()
+  .trim()
+  .min(1, { message: "last name should not be empty" })
+  .max(30, { message: "last name length should be less than 30 characters" }),
   email: z.string().email({ message: "Invalid email address" }),
+  Mobile_number: phoneNumber,
   gender: z.enum(["male", "female", "other"], {
     message: "Gender must be one of 'male', 'female', or 'other'",
   }),

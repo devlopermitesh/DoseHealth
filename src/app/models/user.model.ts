@@ -10,22 +10,23 @@ enum Gender {
 }
 
 // Enum to define user roles
-enum Role {
-    User = "user",        // Regular user
+export enum Role {
+    Patient = "patient",  // Patient user
     Admin = "admin",      // Admin user
     Doctor = "doctor"     // Doctor user
 }
 
 // Interface defining the structure of a User document
 export interface IUser extends Document {
-    fullname: string;           // Full name of the user
+    Profile: string;            // Profile image of the user
+    firstName: string;           // First name of the user
+    lastName: string;           // last name of the user
     email: string;              // Email address of the user
     Mobile_number: number;      // Mobile number of the user (10 digits)
-    password: string;           // Password of the user (hashed)
     gender: Gender;             // Gender of the user (using Gender enum)
     age: number;                // Age of the user
     date_of_birth: Date;        // Date of birth (to calculate age)
-    Zipcode: number;            // Zipcode of the user's address
+    zip_code: number;            // Zipcode of the user's address
     role: Role;                 // Role of the user (using Role enum)
     verifyCode: string;         // Verification code sent to the user
     verified: boolean;          // Whether the user is verified (true or false)
@@ -35,9 +36,18 @@ export interface IUser extends Document {
 
 // Schema definition for User collection
 const UserSchema: Schema<IUser> = new Schema({
-  fullname: {
+  Profile: {
+    type:String,
+    required:false,
+    default:""
+  },
+  firstName: {
     type: String,
-    required: true  // Full name is required
+    required: true  
+  },
+  lastName: {
+    type: String,
+    required: true  
   },
   email: {
     type: String,
@@ -52,10 +62,6 @@ const UserSchema: Schema<IUser> = new Schema({
     required: [true, "Mobile number is required"],
     match: [/^[0-9]{10}$/, "Please enter a valid mobile number"] // Validates a 10-digit mobile number
   },
-  password: {
-    type: String,
-    required: [true, "Password is required"]  // Password is required field
-  },
   gender: {
     type: String,
     enum: Object.values(Gender),
@@ -69,7 +75,7 @@ const UserSchema: Schema<IUser> = new Schema({
     type: Date,
     required: [true, "Date of birth is required"]  // Date of birth is required field
   },
-  Zipcode: {
+  zip_code: {
     type: Number,
     required: [true, "Zipcode is required"]  // Zipcode is required field
   },

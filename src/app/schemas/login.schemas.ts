@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 // Define a phone number schema
-const phoneNumber = z
+export const phoneNumber = z
   .string()
   .regex(
     /^(\+?[1-9]\d{0,2})?[-.\s]?(\(?\d{1,4}\)?)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{0,9}$/,
