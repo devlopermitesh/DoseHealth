@@ -11,6 +11,8 @@ const checkMobileNumberSchema = z.object({
 export async function POST(req: Request) {
     await dbConnect();
     const verifyCode=Math.floor(100000 + Math.random() * 900000).toString();
+    const ExpiryDate=new Date();
+    ExpiryDate.setHours(ExpiryDate.getHours()+1)
     try {
         const {phoneNumber:Mobile_number} = await req.json();
         //validate with zod
@@ -24,6 +26,9 @@ const result=checkMobileNumberSchema.safeParse({Mobile_number});
         if(!user){
             return Response.json({sucess:false,message:"Mobile number is not registered"},{status:400})
         }
+        user.verifyCode=verifyCode;
+        user.verifyExpires=ExpiryDate
+        await user.save();
         //send otp to email
         const response=await SendVerificationEmail({email:user.email,fullname:user.firstName+" "+user.lastName,verifycode:verifyCode})
         if(!response.success){
