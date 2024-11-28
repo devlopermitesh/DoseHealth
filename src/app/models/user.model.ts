@@ -33,7 +33,6 @@ export interface IUser extends Document {
     verifyExpires: Date;        // Date and time when the verification code expires
     address: string;            // Address of the user (text field)
 }
-console.log(Object.values(Role)); 
 // Schema definition for User collection
 const UserSchema: Schema<IUser> = new Schema({
   Profile: {

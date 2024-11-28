@@ -1,4 +1,4 @@
-import { string, z } from "zod";
+import { object, string, z } from "zod";
 import { phoneNumber } from "./login.schemas";
 
 export const signupSchema = z.object({
@@ -35,10 +35,13 @@ export const signupSchema = z.object({
     (date) => date <= new Date(),
     { message: "Date of birth cannot be in the future" }
   ),
+  role: z.enum(["patient", "doctor"], { message: "Role must be one of 'patient' or 'doctor'" }),
+
   zip_code: z
     .number()
     .refine(
       (value) => /^[0-9]{5,6}$/.test(value.toString()),
       { message: "Zip code must be a valid number with 5-6 digits" }
     ),
+  address: z.string().min(1, { message: "Address should not be empty" }),
 });

@@ -8,28 +8,31 @@ export const authOptions: NextAuthOptions = {
   providers: [
     // Credentials Provider (for Mobile number & OTP)
     CredentialsProvider({
-      id: "Mobile_number",
-      name: "Mobilenumber",
+      id: "Credentials",
+      name: "Credentials",
       credentials: {
         mobile: { label: "Mobile Number", type: "text", placeholder: "1234567890" },
-        otp: { label: "OTP", type: "text", placeholder: "Enter OTP" },
+        
       },
       async authorize(credentials): Promise<any> {
         await dbConnect();
-        const { mobile, otp } = credentials || {};
+        const { mobile } = credentials || {};
 
-        if (!mobile || !otp) {
-          throw new Error("Mobile number and OTP are required.");
+        if (!mobile ) {
+          throw new Error("Mobile number is required.");
         }
+        console.log(mobile)
 
         // Verify OTP logic 
-        const IsSamemobileUser = await UserModel.findOne({ Mobile_number: mobile, verifyCode: otp }) as IUser;
+        const IsSamemobileUser = await UserModel.findOne({ Mobile_number: mobile}) as IUser;
         if (!IsSamemobileUser) {
           throw new Error("No user found with this mobile number");
         }
         if (!IsSamemobileUser.verified) {
           throw new Error("Please verify your account first!");
         }
+//if user is log back in and already verifed ,send otp
+
 
         return {
           id: (IsSamemobileUser._id as string).toString(),

@@ -26,7 +26,7 @@ import {
       <Body style={main}>
         <Container style={container}>
           <Img
-            src={favicon.src}
+            src={'https://i.ibb.co/JvHbz91/Screenshot-2024-11-28-105955.png'}
             width="212"
             height="88"
             alt="Unknown Img"
@@ -34,7 +34,7 @@ import {
           />
           <Text style={tertiary}>Verify Your Identity {username}</Text>
           <Heading style={secondary}>
-            Enter the following code to finish linking Venmo.
+            Enter the following code to finish linking your account.
           </Heading>
           <Section style={codeContainer}>
             <Text style={code}>{otp}</Text>
@@ -48,7 +48,7 @@ import {
             if you did not request this code.
           </Text>
         </Container>
-        <Text style={footer}>Securely powered by Plaid.</Text>
+        <Text style={footer}>Securely powered by EverdoseHealth.</Text>
       </Body>
     </Html>
   );
