@@ -2,17 +2,17 @@ import { object, string, z } from "zod";
 import { phoneNumber } from "./login.schemas";
 
 export const signupSchema = z.object({
-  profile: z.string().refine(
-    (file) => {
-      // Check if file is a valid image format and size is less than 2MB
-      const validFormats = ["image/jpeg", "image/png", "image/jpg"];
-      return file && validFormats.some((format) => file.includes(format));
-    },
-    {
-      message: "Profile image must be less than 2MB and in jpeg, png, or jpg format",
-    }
-  ),
-
+  profile: z
+  .instanceof(File) // Ensure the value is a File object
+  .refine((file) => {
+    // Check if the file is a valid image format and size is less than 2MB
+    const validFormats = ["image/jpeg", "image/png", "image/jpg"];
+    const isValidFormat = validFormats.includes(file.type);
+    const isValidSize = file.size <= 2 * 1024 * 1024; // 2MB in bytes
+    return isValidFormat && isValidSize;
+  }, {
+    message: "Profile image must be less than 2MB and in jpeg, png, or jpg format",
+  }),
   firstName: z
   .string()
   .trim()

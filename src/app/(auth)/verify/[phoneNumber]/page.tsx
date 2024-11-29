@@ -121,6 +121,7 @@ const page = () => {
       {/* First container: Logo */}
       <div className="flex w-full h-auto">
         <Image
+        
           src={Imagelogo}
           alt="logo of EverDoseHealth"
           width={200}
