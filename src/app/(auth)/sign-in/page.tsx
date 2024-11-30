@@ -31,6 +31,7 @@ import { EmblaOptionsType } from 'embla-carousel';
 import Wallone from "../../../../public/Images/Imagewallpaper1.png";
 import Wallsecond from "../../../../public/Images/Imagewallpaper2.png";
 import Wallthird from "../../../../public/Images/Imagewallpaper3.png";
+import { signIn } from "next-auth/react";
 
 const slides: string[] = [
   Wallone.src,
@@ -171,6 +172,7 @@ const Page = () => {
             type="button"
             variant="outline"
             className="w-full border border-gray-400 mt-2 py-2 px-1 flex items-center justify-center space-x-2"
+            onClick={() => signIn("google")}
           >
             <Image
               src={GoogleIcon}

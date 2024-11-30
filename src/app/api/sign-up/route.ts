@@ -7,8 +7,9 @@ import { uploadToCloudinary } from "@/app/utils/cloudinary";
 export async function POST(request: Request) {
     await dbConnect();
     try {
+     
         const formData = await request.formData();
-        const Profile = formData.get("Profile") as File;
+        const profile = formData.get("profile") as File;
         const firstName = formData.get("firstName") as string;
         const lastName = formData.get("lastName") as string;
         const email = formData.get("email") as string;
@@ -25,9 +26,9 @@ export async function POST(request: Request) {
 console.log("role",role)
 
         //upload image on cloudinary
-        if (Profile) {
+        if (profile) {
             try {
-              const data = await uploadToCloudinary(Profile, "user-profile");
+              const data = await uploadToCloudinary(profile, "user-profile");
               if (data) {
                 // console.log("Upload successful:", data);
                 avatar.url = data.secure_url;
@@ -49,7 +50,7 @@ console.log("role",role)
             ExpiryDate.setHours(ExpiryDate.getHours()+1)
 
 
-            const newUser =await UserModel.create({ Profile:avatar.url, firstName, lastName, email, Mobile_number, gender, age, date_of_birth, zip_code,
+            const newUser =await UserModel.create({ profile:avatar.url, firstName, lastName, email, Mobile_number, gender, age, date_of_birth, zip_code,
                 role,verifyExpires:ExpiryDate,verifyCode,verified:false,address });
                  
                 //send verification code  to user email
