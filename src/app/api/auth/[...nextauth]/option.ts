@@ -69,9 +69,17 @@ export const authOptions: NextAuthOptions = {
       }
       return token;
     },
+
+    async redirect({ url, baseUrl }) {
+      if (url.startsWith(baseUrl + "/sign-up") || url.startsWith(baseUrl + "/sign-in")) {
+        return url;
+      }
+      return baseUrl; // Default fallback
+    },
   },
   pages: {
     signIn: '/sign-in',
+    newUser: '/sign-up',
   },
   session: {
     strategy: "jwt",

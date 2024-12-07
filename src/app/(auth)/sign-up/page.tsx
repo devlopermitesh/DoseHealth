@@ -1,10 +1,9 @@
 "use client"
-import React from 'react'
+import React, { useEffect } from 'react'
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import Image from "next/image";
 import z from "zod"
-import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import { signupSchema } from "@/app/schemas/signup.schemas";
@@ -18,6 +17,9 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Input } from '@/components/ui/input';
 import Logo from '@/components/customeComponets/Logo';
 import { Textarea } from '@/components/ui/textarea';
+import {signIn} from "next-auth/react"
+import { useSession } from 'next-auth/react';
+import { User } from 'next-auth';
 interface AddressDetails {
   Name: string;
   Description: string | null; // Description can be a string or null
@@ -35,20 +37,30 @@ interface AddressDetails {
 
 
 const page = () => {
-const [currentStep,setCurrentStep] = React.useState<number>(0);
+//using session email at case of google verify we need email from session ,but other details need to be fill manually
+const {data:session}=useSession()
 const [isSubmitting, setIsSubmitting] = React.useState<boolean>(false);
 const [showAddress,setshowAddress]=React.useState<string[]>([])
+const [googleEmail,setgoogleEmail]=React.useState<string>("")
 const [checked,setChecked]=React.useState<boolean>(false)
 const {toast}=useToast()
 const router=useRouter()
 
+//fill the email value from google 
+useEffect(()=>{
+
+  if(!session||!session.user) return ;
+  setgoogleEmail(session.user.email as string)
+  
+    
+  },[session])
 const form = useForm<z.infer<typeof signupSchema>>({
     resolver: zodResolver(signupSchema),
     defaultValues:{
         profile:undefined,
         firstName: "",
         lastName: "",
-        email: "",
+        email: googleEmail?? "",
       Mobile_number: "",
       gender: "male",
       age: 0,
@@ -150,6 +162,10 @@ const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
   setChecked(e.target.checked); // Update the checkbox state
 };
 const fileRef = form.register("profile")
+
+
+
+
 const onSubmit = async (data: z.infer<typeof signupSchema>) => {
   try {
     setIsSubmitting(true);
@@ -182,7 +198,14 @@ const onSubmit = async (data: z.infer<typeof signupSchema>) => {
         title: "Account created successfully! Check your Email for verification.",
         description: "Please complete your profile.",
       });
-      router.replace(`/verify/${data.Mobile_number}`);
+      if(data.role === "Patient"){
+        
+        router.push(`/Patient-signup/${response.data.data}`)
+
+      }
+      else{
+        // router.push("/sign-up-Doctor")
+      }
     }
   } catch (error) {
     const axiosError = error as AxiosError;     const errorMessage = (axiosError.response?.data as { message: string })?.message || "An error occurred while processing your request.";
@@ -202,6 +225,23 @@ const onSubmit = async (data: z.infer<typeof signupSchema>) => {
   };
 
 
+  const handleGoogleLogin = async (e: React.SyntheticEvent, redirectPath: string) => {
+    e.preventDefault(); // Prevent default behavior
+  const callbackUrl = `${window.location.origin}/${redirectPath}`;
+    const Google = await signIn("google", {
+      redirect: true,
+      callbackUrl // Dynamically set the redirect path
+    });
+  
+    if (Google?.error) {
+      alert("Error logging in with Google");
+    } else {
+      console.log("Google login successful");
+
+      alert(googleEmail)
+    }
+  };
+
   return (
     <div className="flex flex-col w-full h-screen bg-white">
       <div className="flex w-full h-auto">
@@ -218,12 +258,12 @@ const onSubmit = async (data: z.infer<typeof signupSchema>) => {
           <h1 className="text-3xl font-semibold">Sign up</h1>
           <p className='text-md text-gray-700 font-extralight '>Kindly fill the form to sign up</p>
           <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit, onError)}  className="grid grid-cols-1 grid-rows-4 gap-2 md:grid-cols-2 md:grid-rows-3 md:gap-3">
+          <form onSubmit={form.handleSubmit(onSubmit, onError)}  className="grid grid-cols-1 grid-rows-4 gap-1 lg:grid-cols-2 lg:grid-rows-3 lg:gap-3">
           <FormField
   control={form.control}
   name="profile"
   render={({ field }) => (
-    <FormItem>
+    <FormItem className='col-span-2 md:col-span-1'>
       <FormLabel>Profile</FormLabel>
       <FormControl>
         <input
@@ -247,7 +287,7 @@ const onSubmit = async (data: z.infer<typeof signupSchema>) => {
           control={form.control}
           name="email"
           render={({ field }) => (
-            <FormItem>
+            <FormItem className='col-span-2 md:col-span-1'>
               <FormLabel className=' flex text-center gap-2 text-gray-700 text-md'>E-mail <Logo name="exlamation" className='w-1 h-1' style={{color:"black"}} iconSize={10} /></FormLabel>
               <FormControl>
               <Input type="email" placeholder="enter your email" className='border-solid border-gray-800 border-2 focus:border-sky-500' {...field} onBlur={() => form.trigger("email")}/>
@@ -263,7 +303,7 @@ const onSubmit = async (data: z.infer<typeof signupSchema>) => {
           control={form.control}
           name="firstName"
           render={({ field }) => (
-            <FormItem>
+            <FormItem className='col-span-2 md:col-span-1'>
               <FormLabel className=' flex text-center gap-2 text-gray-700 text-md'>firstName <Logo name="exlamation" className='w-1 h-1' style={{color:"black"}} iconSize={10} /></FormLabel>
               <FormControl>
               <Input type="text" placeholder="enter your firstName" className='border-solid border-gray-800 border-2 focus:border-sky-500' {...field} onBlur={() => form.trigger("firstName")} />
@@ -279,7 +319,7 @@ const onSubmit = async (data: z.infer<typeof signupSchema>) => {
           control={form.control}
           name="lastName"
           render={({ field }) => (
-            <FormItem>
+            <FormItem className='col-span-2 md:col-span-1'>
               <FormLabel className=' flex text-center gap-2 text-gray-700 text-md'>lastName <Logo name="exlamation" className='w-1 h-1' style={{color:"black"}} iconSize={10} /></FormLabel>
               <FormControl>
               <Input type="text" placeholder="enter your lastName" className='border-solid border-gray-800 border-2 focus:border-sky-500' {...field} onBlur={() => form.trigger("lastName")}/>
@@ -295,7 +335,7 @@ const onSubmit = async (data: z.infer<typeof signupSchema>) => {
   control={form.control}
   name="gender"
   render={({ field }) => (
-    <FormItem>
+    <FormItem className='col-span-2 md:col-span-1'>
       <FormLabel className='flex text-center gap-2 text-gray-700 text-md'>
         Gender <Logo name="exlamation" className='w-1 h-1' style={{color:"black"}} iconSize={10} />
       </FormLabel>
@@ -322,7 +362,7 @@ const onSubmit = async (data: z.infer<typeof signupSchema>) => {
   control={form.control}
   name="age"
   render={({ field }) => (
-    <FormItem>
+    <FormItem className='col-span-2 md:col-span-1'>
       <FormLabel className='flex text-center gap-2 text-gray-700 text-md'>
         Age <Logo name="exlamation" className='w-1 h-1' style={{color:"black"}} iconSize={10} />
       </FormLabel>
@@ -346,7 +386,7 @@ const onSubmit = async (data: z.infer<typeof signupSchema>) => {
   control={form.control}
   name="date_of_birth" 
   render={({ field }) => (
-    <FormItem>
+    <FormItem className='col-span-2 md:col-span-1'>
       <FormLabel className='flex text-center gap-2 text-gray-700 text-md'>
         Date of Birth <Logo name="exlamation" className='w-1 h-1' style={{color:"black"}} iconSize={10} />
       </FormLabel>
@@ -370,7 +410,7 @@ const onSubmit = async (data: z.infer<typeof signupSchema>) => {
   control={form.control}
   name="Mobile_number"
   render={({ field }) => (
-    <FormItem>
+    <FormItem className='col-span-2 md:col-span-1'>
       <FormLabel className="flex text-center gap-2 text-gray-700 text-md">
         Mobile Number <Logo name="exlamation" className="w-1 h-1" style={{ color: "black" }} iconSize={10} />
       </FormLabel>
@@ -396,7 +436,7 @@ const onSubmit = async (data: z.infer<typeof signupSchema>) => {
   control={form.control}
   name="zip_code"
   render={({ field }) => (
-    <FormItem>
+    <FormItem className='col-span-2 md:col-span-1'>
       <FormLabel className='flex text-center gap-2 text-gray-700 text-md'>
         Zip Code <Logo name="exlamation" className='w-1 h-1' style={{color:"black"}} iconSize={10} />
       </FormLabel>
@@ -426,7 +466,7 @@ const onSubmit = async (data: z.infer<typeof signupSchema>) => {
   control={form.control}
   name="role"
   render={({ field }) => (
-    <FormItem>
+    <FormItem className='col-span-2 md:col-span-1'>
       <FormLabel className='flex text-center gap-2 text-gray-700 text-md'>
         Role <Logo name="exlamation" className='w-1 h-1' style={{color:"black"}} iconSize={10} />
       </FormLabel>
@@ -505,14 +545,40 @@ const onSubmit = async (data: z.infer<typeof signupSchema>) => {
           </div>
 
           {/* Continue button: Disabled if checkbox is not checked */}
+   
           <Button
-            type="submit"
-            className="bg-sky-500 text-white p-2 text-center text-xl"
-          
-            disabled={!checked} // Disable the button when checkbox is unchecked
-          >
-            Continue
-          </Button>
+                type="submit"
+                disabled={isSubmitting || !checked}
+                className="mt-4 px-4 py-2 w-full bg-blue-500 text-white rounded hover:bg-blue-600 flex items-center justify-center"
+              >
+                {isSubmitting? (
+                  <>
+                    <svg
+                      className="animate-spin h-5 w-5 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                      ></path>
+                    </svg>
+                    <p className="ml-2 text-white font-bold opacity-75">Submitting</p>
+                  </>
+                ) : (
+                  "Continue"
+                )}
+              </Button>
         </div>
     </form>
 
@@ -524,6 +590,7 @@ const onSubmit = async (data: z.infer<typeof signupSchema>) => {
             type="button"
             variant="outline"
             className="w-full border border-gray-400 mt-2 py-2 px-1 flex items-center justify-center space-x-2"
+            onClick={(e) => handleGoogleLogin(e, "/sign-up")}
           >
             <Image
               src={GoogleIcon}

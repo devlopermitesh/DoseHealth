@@ -22,9 +22,9 @@ const result=checkMobileNumberSchema.safeParse({Mobile_number});
             return Response.json({success:false,message:error?.length>0?error[0]:"Invalid mobile number"},{status:400})
         }
         const data=result.data;
-        const user=await UserModel.findOne({Mobile_number});
+        const user=await UserModel.findOne({Mobile_number , verified:true});
         if(!user){
-            return Response.json({sucess:false,message:"Mobile number is not registered"},{status:400})
+            return Response.json({sucess:false,message:"Mobile number is not registered or not verified"},{status:400})
         }
         user.verifyCode=verifyCode;
         user.verifyExpires=ExpiryDate

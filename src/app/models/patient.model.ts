@@ -1,5 +1,13 @@
 import mongoose, {Schema,model,Document,} from "mongoose"
 
+export enum MaritalStatus {
+  Single = "single",
+  Married = "married",
+  Divorced = "divorced",
+  Widowed = "widowed",
+  Separated = "separated",
+}
+
 
 type Medical_history_type={
 chronic_diseases: string[],
@@ -17,6 +25,7 @@ type Recent_Tests={
     test_name: string,
     test_date: Date,
     result: string,
+    file:string
 }
 type Current_health_status={
     current_medication:string[],
@@ -28,9 +37,11 @@ export interface IPatient extends Document {
     userId:mongoose.Types.ObjectId,
     doctorId:mongoose.Types.ObjectId[],
     blood_group:string,
-    height:number,
-    weight:number,
+    civil_status:MaritalStatus ,
+    height:string,
+    weight:string,
     bmi: number;
+    note:string,
     medical_history: Medical_history_type,
     insurance:Insurance_type[],
     appointments:mongoose.Types.ObjectId[],
@@ -44,6 +55,7 @@ const PatientSchema=new Schema<IPatient>({
         type:mongoose.Schema.Types.ObjectId,
         ref:"User",
         required:true,
+        unique:true
     },
     doctorId:[{
         type:mongoose.Schema.Types.ObjectId,
@@ -54,16 +66,24 @@ const PatientSchema=new Schema<IPatient>({
         type:String,
         required:false,
     },
+    civil_status:{
+        type:String,
+        enum:Object.values(MaritalStatus),
+    },
     height: {
-        type: Number,
+        type: String,
         required: false, 
       },
       weight: {
-        type: Number,
+        type: String,
         required: false, 
       },
       bmi:{
         type:Number,
+        required:false
+      },
+      note:{
+        type:String,
         required:false
       },
       medical_history: {
@@ -98,15 +118,20 @@ const PatientSchema=new Schema<IPatient>({
         recent_tests: [{
           test_name: {
             type: String,
-            required: true
+            required:false
+          
           },
           test_date: {
             type: Date,
-            required: true
+            required: false
           },
           result: {
             type: String,
-            required: true
+            required: false
+          },
+          file:{
+            type:String,
+            required:false
           }
         }],
         symptoms: {

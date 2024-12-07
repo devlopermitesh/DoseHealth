@@ -11,9 +11,9 @@ enum Gender {
 
 // Enum to define user roles
 export enum Role {
-    Patient = "patient",  // Patient user
-    Admin = "admin",      // Admin user
-    Doctor = "doctor"     // Doctor user
+    Patient = "Patient",  // Patient user
+    Admin = "Admin",      // Admin user
+    Doctor = "Doctor"     // Doctor user
 }
 
 // Interface defining the structure of a User document
@@ -54,11 +54,13 @@ const UserSchema: Schema<IUser> = new Schema({
         /^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/,
         "Please enter a valid email address"  // Regular expression for validating email format
     ],
+    unique: true,
     required: [true, "Email is required"]  // Email is required field
   },
   Mobile_number: {
     type: Number,
     required: [true, "Mobile number is required"],
+    unique: true,
     match: [/^[0-9]{10}$/, "Please enter a valid mobile number"] // Validates a 10-digit mobile number
   },
   gender: {

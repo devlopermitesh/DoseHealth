@@ -5,7 +5,6 @@ export interface IDependency extends Document {
   name: string;
   profile_url?: string; // Optional
   relationships: string;
-  age: number;
   birth_of_date: Date; // Correct type
   contact_number: string;
   email: string;
@@ -31,12 +30,7 @@ const DependencySchema: Schema<IDependency> = new Schema(
       required: true,
       default: "relative",
     },
-    age: {
-      type: Number,
-      required: true,
-      max: [120, "Age cannot be greater than 120"],
-      min: [1, "Age must be at least 1"],
-    },
+   
     birth_of_date: {
       type: Date,
       required: true,
