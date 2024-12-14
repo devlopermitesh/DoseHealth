@@ -22,7 +22,7 @@ interface MultiSelectProps {
 
 const createOption = (label: string): Option => ({
   label,
-  value: label.toLowerCase().replace(/\W/g, ""),
+  value: label.trim(), // Keep spaces and alphanumeric characters
 });
 
 const MultiSelect: React.FC<MultiSelectProps> = ({

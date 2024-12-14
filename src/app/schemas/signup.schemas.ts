@@ -41,9 +41,9 @@ export const signupSchema = z.object({
   role: z.enum(["Patient", "Doctor"], { message: "Role must be one of 'Patient' or 'Doctor'" }),
 
   zip_code: z.coerce.number()
-    .refine(
-      (value) => /^[0-9]{5,6}$/.test(value.toString()),
-      { message: "Zip code must be a valid number with 5-6 digits" }
-    ),
+  .refine(
+    (value) => /^[0-9]{5,6}$/.test(value.toString()),
+    { message: "Zip code must be a valid number with 5-6 digits" }
+  ),
   address: z.string().min(1, { message: "Address should not be empty" }),
 });
