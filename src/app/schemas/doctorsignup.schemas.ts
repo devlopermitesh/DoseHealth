@@ -20,7 +20,7 @@ const combinedDoctorSchema = z.object({
 
   // Experience in Years
   experience_years: z.number().min(0, { message: "Experience years should be at least 0" }),
-  availableEveryDay: z.string().optional().default("Yes"),
+  availableEveryDay: z.string().optional().default("No"),
 
   // Availability (Days and Time Slots)
   availability: z
@@ -43,11 +43,11 @@ const combinedDoctorSchema = z.object({
       .array(
         z.object({
           degree: z.string().min(1, { message: "Degree is required" }),
-          institution: z.string().min(1, { message: "Institution name is required" }),
+          degree_institution: z.string().min(1, { message: "Institution name is required" }),
           year_of_graduation:  z
           .preprocess((val) => (typeof val === "string" ? parseInt(val, 10) : val), z.number())
           ,
-               file:  z
+               education_file:  z
             .instanceof(File)
             .refine((file) => {
               // Check if the file is a valid image format and size is less than 2MB
@@ -71,7 +71,7 @@ const combinedDoctorSchema = z.object({
             .min(1, { message: "Certification name is required" }),
             institution: z.string().min(1, { message: "Institution name is required" }),
             issue_date: issueDateValidation,
-          file:  z
+            certificate_file:  z
           .instanceof(File)
           .refine((file) => {
             // Check if the file is a valid image format and size is less than 2MB

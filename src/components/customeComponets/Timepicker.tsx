@@ -42,7 +42,7 @@ const Timepicker: React.FC<TimepickerProps> = ({ updateTime,onSave }) => {
           htmlFor="start-time"
           className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
         >
-          Start Time:
+          From Time:
         </label>
         <input
           type="time"
@@ -58,7 +58,7 @@ const Timepicker: React.FC<TimepickerProps> = ({ updateTime,onSave }) => {
           htmlFor="end-time"
           className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
         >
-          End Time:
+          To Time:
         </label>
         <input
           type="time"

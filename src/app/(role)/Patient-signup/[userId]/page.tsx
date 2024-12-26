@@ -239,6 +239,7 @@ const onSubmit = async (data: z.infer<typeof patientInputSchema>) => {
     });
 
     if (response.status == 200 || response.data.success) {
+      const updateNumber=response.data.data //Mobile_number
 
       toast({
         title: "Success",
@@ -247,7 +248,8 @@ const onSubmit = async (data: z.infer<typeof patientInputSchema>) => {
         color:"green"
       });
 
-      router.replace('/sign-in');
+      // router.replace('/sign-in');
+      router.replace(`/verify/${updateNumber}`);
     }
 
     

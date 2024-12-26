@@ -14,16 +14,17 @@ import { Label } from "@/components/ui/label";
 import Timepicker from "@/components/customeComponets/Timepicker";
 import { Button } from "@/components/ui/button";
 import { format } from 'date-fns';
-import { currencies, institutionOptions, languageOptions, Option } from "@/app/constants/SelectOptions";
+import { currencies, institutionOptions, languageOptions, licenseTypes, Option } from "@/app/constants/SelectOptions";
 import dynamic from "next/dynamic";
 import { useToast } from "@/hooks/use-toast";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
+import { useParams,useRouter } from "next/navigation";
 const MultiSelect=dynamic(()=>import('@/components/customeComponets/Mutliselect'),{ssr:false})
 const CreatableSelect = dynamic(()=>import('react-select/creatable'), { ssr: false })
 const defaultValues = {
   specialization: "",
   experience_years: 0,
-  availableEveryDay: "Yes",
+  availableEveryDay: "No",
   availability: [
     {
       day: "",
@@ -36,9 +37,9 @@ const defaultValues = {
     educations: [
       {
         degree: "",
-        institution: "",
+        degree_institution: "",
         year_of_graduation: new Date().getFullYear(),
-        file:undefined
+        education_file:undefined
       },
     ],
     certifications: [
@@ -46,7 +47,7 @@ const defaultValues = {
         certification_name: "",
         institution: "",
         issue_date: new Date().toISOString().split('T')[0],
-        file:undefined
+        certificate_file:undefined
       },
     ],
     license_number: "",
@@ -104,7 +105,11 @@ const page = () => {
   const [timeSlots, setTimeSlots] = React.useState<string[]>([]);
   const [isAvaiblableEveryDay, setIsAvailableEveryDay] = React.useState<string>("No");
   const [showAddress,setshowAddress]=React.useState<string[]>([])
+  const router=useRouter()
   const {toast}=useToast()
+  const dataparams=useParams();  
+   const {userId}=dataparams;
+
   const form = useForm<z.infer<typeof combinedDoctorSchema>>({ resolver: zodResolver(combinedDoctorSchema), defaultValues });
   const { fields:AvailabilityField, append:AvailabilityAppend, remove:AvailabilityRemove } = useFieldArray({
     control: form.control,
@@ -124,18 +129,124 @@ const {fields:AwardsFields,append:AwardsAppend,remove:AwardsRemove}=useFieldArra
   control:form.control,
   name:"bio_details.awards_recognition"
 })
+const onSubmit = async (data: z.infer<typeof combinedDoctorSchema>) => {
+  try {
+    setIsSubmitting(true)
+    const formData = new FormData();
+  formData.append('userId', userId as string);
+    formData.append("specialization",data.specialization)
+    formData.append("experience_years",data.experience_years.toString())
+    formData.append("availability",JSON.stringify(data.availability))
+    formData.append("bio",data.bio)
+    data.bio_details.educations.map((education)=>{
+      formData.append("degree",education.degree)
+      formData.append("degree_institution",education.degree_institution)
+      formData.append("year_of_graduation",education.year_of_graduation.toString())
+      if (education.education_file) {
+        formData.append("degrees_files", education.education_file)
+      }
+    })
+    data.bio_details.certifications.map((certificate)=>{
+      formData.append("certification_name",certificate.certification_name)
+      formData.append("institution",certificate.institution)
+      formData.append("issue_date",certificate.issue_date)
+      if(certificate.certificate_file){
+        formData.append("certification_files",certificate.certificate_file)
+      }
+    })
+    data.bio_details.languages_spoken?.map((language)=>{
+formData.append("languages_spoken",language)
+  })
+  data.bio_details.social_links?.map((social_link)=>{
+    formData.append("social_links",social_link)
+  })
 
-  const onSubmit = async (data: z.infer<typeof combinedDoctorSchema>) => {
-try {
-  alert('hey we got data happily')
-  console.log(data)
+
+    formData.append("awards_recognition",JSON.stringify(data.bio_details.awards_recognition))
+formData.append("licence_number",data.bio_details.license_number)
+formData.append("licence_issued_by",data.bio_details.license_issued_by)
+formData.append("license_type",data.bio_details.license_type)
+if(data.bio_details.license_proof){
+  formData.append("licence_proof",data.bio_details.license_proof)
+}
+formData.append("clinic_name",data.bio_details.clinic_details.clinic_name)
+formData.append("clinic_address",data.bio_details.clinic_details.clinic_address)
+formData.append("contact_number",data.bio_details.clinic_details.contact_number)
+formData.append("email",data.bio_details.clinic_details.email)
+formData.append("consultation_fees",data.bio_details.consultation_fees.toString())
+formData.append("consultation_currency",data.bio_details.consulation_currency)
+    console.log(formData);
+//send data to backend
+    const response = await axios.post("http://localhost:3000/api/sign-up-Doctor", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+
+    if (response.status == 200 || response.data.success) {
+      const updateNumber=response.data.data.Mobile_number //Mobile_number
+
+      toast({
+        title: "Success",
+        description: response.data.message || "doctor account created successfully.please verify your account",
+        variant: "default", 
+        color:"green"
+      });
+
+      router.replace(`/verify/${updateNumber}`);
+    }
+
+
 } catch (error) {
-  console.log("error",error)
+  if (axios.isAxiosError(error)) {
+    const axiosError = error as AxiosError; 
+    const errorMessage = (axiosError.response?.data as { message: string })?.message ;
+    if (axiosError.response) {
+      // Server error: Display red toast
+      toast({
+        title: "Error",
+        description: errorMessage || "Error while creating doctor.",
+        variant: "destructive", // Use "destructive" variant for errors
+      });
+      console.error("API Error Response:", axiosError.response.data);
+    } else if (axiosError.request) {
+      // No response: Display red toast
+      toast({
+        title: "Error",
+        description: "No response received from the server. Please try again later.",
+        variant: "destructive",
+      });
+      console.error("No Response:", axiosError.request);
+    } else {
+      // Request setup error: Display red toast
+      toast({
+        title: "Error",
+        description: `Request setup error: ${axiosError.message}`,
+        variant: "destructive",
+      });
+      console.error("Request Setup Error:", axiosError.message);
+    }
+  } else {
+    // Unexpected error: Display red toast
+    toast({
+      title: "Error",
+      description: "An unexpected error occurred. Please try again.",
+      variant: "destructive",
+    });
+    console.error("Unexpected Error:", error);
+  }
+}
+finally{
+  setIsSubmitting(false)
 }
 
   };
   const onError = (errors: any) => {
-    alert("errors");
+   toast({
+    title: "Error",
+    description: `Validation errors:${errors.message??"checking errors"}`,
+    variant: "destructive",
+   })
     console.log("Validation errors:", errors);
   };
 
@@ -299,11 +410,13 @@ try {
                         onValueChange={(value) => {
                           field.onChange(value);
                           setIsAvailableEveryDay(value);
+                          if(value === "Yes"){
                           for(let i=0;i<6;i++){
                          if( AvailabilityField.length <= 6){
                             AvailabilityAppend({ day: days[i], time_slots: [] }); 
                           }
                          }
+                        }
                         }}
 
                         defaultValue="No"
@@ -401,12 +514,24 @@ try {
           if (!existingSlots.includes(time_slots)) {
             const updatedSlots = [...existingSlots, time_slots];
             field.onChange(updatedSlots);
-            alert("Time slot added successfully!");
+            toast({
+              title: "Time slot added successfully!",
+              variant: "default",
+              color:"green"
+            })
           } else {
-            alert("This time slot already exists.");
+            toast({
+              title:"This time slot already exists.",
+              variant:"default",
+            })
           }
         } else {
-          alert("Start time must be before end time.");
+          toast({
+            title:"Start time must be before end time.",
+            variant:"destructive",
+            color:"red"
+
+          })
         }
       
     } else {
@@ -427,7 +552,9 @@ try {
   
                     <div className="flex space-x-2 w-full">
                       <Button variant="destructive" className="bg-red-500 text-white mt-auto w-full" onClick={()=>{
-                        if(index > 0) {remove:AvailabilityRemove(index)}
+                        if(index > 0) {
+                          AvailabilityRemove(index)
+                        }
                         else {alert("You cannot remove:AvailabilityRemove the first field")}
                         }}>
                         <Logo name="delete" className="w-5 h-5 mr-2" style={{ color: "white" }} iconSize={20} />
@@ -484,13 +611,13 @@ try {
                       </div>
                       {/* institution */}
                       <div className="col-span-2 md:col-span-1"> 
-  <label htmlFor="institution">Select or Create Institution</label>
+  <label htmlFor="degree_institution">Select or Create Institution</label>
   <Controller
     control={form.control}
-    name={`bio_details.educations.${index}.institution`}
+    name={`bio_details.educations.${index}.degree_institution`}
     render={({ field }) => (
       <CreatableSelect
-        id="institution"
+        id="degree_institution"
         {...field}
         isClearable
         options={institutionOptions} // Ensure this is structured as [{ label, value }, ...]
@@ -545,7 +672,7 @@ try {
   
   <Controller
     control={form.control}
-    name={`bio_details.educations.${index}.file`}
+    name={`bio_details.educations.${index}.education_file`}
     render={({ field, fieldState }) => (
       <>
         <input
@@ -576,9 +703,9 @@ try {
                       <Button variant="outline" className="shadow-md" onClick={() =>
                         EducationAppend({
                           degree: "",
-                          institution: "",
+                          degree_institution: "",
                           year_of_graduation: new Date().getFullYear(),
-                          file: undefined
+                          education_file: undefined
                         })
                       }>
                         Add More</Button>
@@ -665,17 +792,18 @@ Issue Date
 
 {/* {proof of Certificate } */}
 <div  className="col-span-2 md:col-span-1">
-  <Label htmlFor={`result_${index}`} className="mb-1">
+  <Label htmlFor={`certificate_file_${index}`} className="mb-1">
     Upload Certicate Image
   </Label>
   
   <Controller
     control={form.control}
-    name={`bio_details.certifications.${index}.file`}
+    name={`bio_details.certifications.${index}.certificate_file`}
     render={({ field, fieldState }) => (
       <>
         <input
           type="file"
+          id={`certificate_file_${index}`}
           accept="image/jpeg,image/png,image/jpg"
           onChange={(e) => {
             const file = e.target.files?.[0] || null; // Handle file selection
@@ -705,7 +833,7 @@ Issue Date
                             certification_name: "",
                             institution: "",
                             issue_date: new Date().toISOString().split('T')[0],
-                            file: undefined
+                            certificate_file: undefined
                         })
                       }>
                         Add More</Button>
@@ -784,7 +912,7 @@ Issue Date
         id="license_type"
         {...field}
         isClearable
-        options={institutionOptions} // Ensure this is structured as [{ label, value }, ...]
+        options={licenseTypes} // Ensure this is structured as [{ label, value }, ...]
         value={
           field.value
             ? { label: field.value, value: field.value } // Map the value for CreatableSelect
@@ -1077,7 +1205,7 @@ Issue Date
 </div>
 
 {/* button for adding more education or deleting */}
-<div className='flex w-1/2 mx-auto justify-between border-2 border-solid border-red-400  space-x-10 md:space-x-20 col-span-2'>
+<div className='flex w-1/2 mx-auto justify-between  space-x-10 md:space-x-20 col-span-2'>
                       <Button variant="destructive" className="shadow-md" onClick={() => AwardsRemove(index)}>Remove</Button>
                       <Button variant="outline" className="shadow-md" onClick={() =>
                         AwardsAppend({
@@ -1135,7 +1263,9 @@ Issue Date
   render={({ field }) => (
     <MultiSelect
       {...field}
-      options={[]}
+      options={[
+        { label: "Facebook -www.facebook.com", value:"Facebook -www.facebook.com" },
+      ]}
       value={field.value?.map((value) => ({ label: value, value }))}
       onChange={(selected) => field.onChange(selected.map((option) => option.value))}
       className="z-50" 

@@ -38,7 +38,7 @@ const DoctorSchema:Schema<IDoctor>=new Schema({
       bio:{
         type:Schema.Types.ObjectId,
         ref:"Bio",
-        required:true
+        required:false
       }
     },{
         timestamps:true

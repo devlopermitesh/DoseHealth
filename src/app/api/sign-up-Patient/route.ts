@@ -38,7 +38,7 @@ export async function POST(req: Request) {
         const test_result_files = formData.getAll('test_result_files') || [];
         const note = formData.get('note') || "";
         const Dependencys = JSON.parse(formData.get('Dependencys')?.toString() || "[]");
-        const verifyCode = Math.floor(100000 + Math.random() * 900000).toString();
+        
         const ExpiryDate=new Date();
         ExpiryDate.setHours(ExpiryDate.getHours()+1)
         // Find user by userId
@@ -118,15 +118,20 @@ export async function POST(req: Request) {
             dependencys: Dependencys,
         })
         ;
-        console.log(patient)
-        // send user a verify status code
-        const EmailResponse = await SendVerificationEmail({ email: user?.email, fullname: `${user.firstName} ${user.lastName}`, verifycode: verifyCode })
+        const populatedPatient = await PatientModel.findById(patient._id)
+        .populate('userId', 'Mobile_number verifyCode');  // Include 'verifyCode' along with 'Mobile_Number'
+      console.log("Patient:", populatedPatient);
+      console.log("Mobile_Number:", populatedPatient.userId.Mobile_number);
+      console.log("VerifyCode:", populatedPatient.userId.verifyCode);//875802
+      
+        // // send user a verify status code
+        const EmailResponse = await SendVerificationEmail({ email: user?.email, fullname: `${user.firstName} ${user.lastName}`, verifycode: populatedPatient.userId.verifyCode });
         if(!EmailResponse.success){
             return NextResponse.json({success:false,message:EmailResponse.message||"Error while sending verification email"},{status:500})
         }
 
         // Return success response
-        return NextResponse.json({ success: true, message: "Patient created successfully.you can sign in now",}, { status: 200 });
+        return NextResponse.json({ success: true, message: "Patient created successfully.you can check your email and verify.",data:populatedPatient.userId.Mobile_number}, { status: 200 });
 
     } catch (error ) {
         console.error("Error while creating patient:", error);
