@@ -24,7 +24,7 @@ export async function POST(request: Request) {
         const fullname = `${firstName} ${lastName}`;
         const verifyCode = Math.floor(100000 + Math.random() * 900000).toString();
 
-        console.log("Form Data:", { profile, firstName, lastName, email, Mobile_number });
+        console.log("Form Data:", { profile, firstName, lastName, email, Mobile_number, gender, age, date_of_birth, zip_code, role, address });
 
         // Cloudinary upload helper
         const uploadProfileToCloudinary = async (file: File, folder: string) => {

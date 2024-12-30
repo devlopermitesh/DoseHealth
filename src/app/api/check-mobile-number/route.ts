@@ -34,6 +34,7 @@ const result=checkMobileNumberSchema.safeParse({Mobile_number});
         if(!response.success){
             return Response.json({success:false,message:response.message||"Error while sending login otpcode to email"},{status:500})
         }
+
         return Response.json({sucess:true,message:"Mobile number is registered  Please verify with  your code.valid In 1 hour"},{status:200})
 
     } catch (error) {

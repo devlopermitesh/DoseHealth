@@ -113,8 +113,8 @@ export const CustomCalendar: React.FC<CustomCalendarProps> = ({ Data }) => {
                             {daysDateData.map((item, index) => (
                                 <td
                                     key={index}
-                                    className={`h-9 w-16 lg:w-9 text-center text-sm text-sidebar-primary-foreground p-0 relative font-semibold 
-                                    ${item.highlight ? 'bg-sky-600 text-white rounded-full' : ''}`}
+                                    className={`h-9 w-16 lg:w-9 text-center text-sm p-0 relative font-semibold 
+                                    ${item.highlight ? 'bg-sky-600 text-white rounded-full' : 'text-gray-400'}`}
                                 >
                                     <button
                                         className="h-9 w-9 p-0 font-normal"

@@ -142,13 +142,17 @@ const Dashboard: React.FC = () => {
     return <div>Loading...</div>;
   }
   const chartData = [
-    { month: "January", desktop: 186 },
-    { month: "February", desktop: 305 },
-    { month: "March", desktop: 237 },
-    { month: "April", desktop: 73 },
-    { month: "May", desktop: 209 },
-    { month: "June", desktop: 214 },
-  ]
+    { date: '2023-01-01', value: 75 },
+    { date: '2023-01-02', value: 80 },
+    { date: '2023-01-03', value: 78 },
+    { date: '2023-01-04', value: 82 },
+    { date: '2023-01-05', value: 85 },
+    { date: '2023-01-06', value: 88 },
+    { date: '2023-01-07', value: 90 },
+    { date: '2023-01-08', value: 92 },
+];
+
+
   return (
 <div className="h-auto w-full bg-[#6495ED] bg-opacity-5  flex flex-col scrollbar-hide">
 <Navbar/>
@@ -215,8 +219,8 @@ const Dashboard: React.FC = () => {
 <div className='w-full lg:w-[70%]  '>
 <CustomLineChart 
 data={chartData}
-xAxisKey='month'
-lineKey='desktop'
+xAxisKey='date'
+lineKey='value'
 reportName='Heart Rate'
 period='Last 6 months'
 result='78.0%'
@@ -237,7 +241,7 @@ trendPercentage={10}
     </span>
   </li>
   {/* see all reports button  */}
-  <Button className='bg-sky-700 text-white font-semibold py-2 rounded-lg text-center hover:bg-sky-600'>See All Reports</Button>
+  <Button className='bg-event text-white font-semibold py-2 rounded-lg text-center hover:bg-event'>See All Reports</Button>
 </ul>
 </div>
 </div>
